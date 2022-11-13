@@ -1,0 +1,50 @@
+27-8-2015
+---------
+
+ - Els jocs amb MMC3 no acaven d'anar bé. Segurament pel IRQ, però pot
+   ser per altres coses també. En aquest aspecte és interesant veure
+   que pasa amb "Super C", ja què pareix que no gasta l'IRQ.
+
+ - El so clarament va més lent que la imatge. És com si el timing de
+   l'APU no fora l'adequat.
+
+ - La versió PAL és una drama. L'exemple més clar és Battletoads (Europe).
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Apunts vells, però pot ser útils revisar-los.
+
+OPTIMITZATCIONS
+---------------
+
+- PPU: Realment la gestió dels cicles de DMA no està ben feta, ja que
+       mentres que la UCP està parà crec (no estic 100% segur) que la
+       APU ha de continuar executant-se.
+
+- APU: En comptes de anar cicle a cicle, el que es pot fer mentre no
+  es modifique ningun paràmetre és:
+    - Vore de tots els canals i el frame sequencer, quin és el que
+      primer es va canviar, i estimar (és trivial) els cicles que
+      falten.
+    - Si s'aplega a eixos cicles, o es canvia l'estat, el que ocorrega
+      primer, aleshores es calculen les mostres. Els comptadors
+      posiblemnt s'han de contar 1 a 1, però el valor que aplega al
+      DAC sols es necessari calcular-lo una vegada i repetir-lo.
+    - IMPORTANT: Analitzar si entre clock i clock del timer és posible
+      modificar l'exida del canal, si no ho és, l'optimització pot ser
+      molt gran. Sols caldria calcular l'eixida una vegada i fer clock
+      d'un únic canal (o tal vegada un clock d'uns quants a la
+      vegada).
+
+ERRATES
+-------
+
+- PAL: El sò en PAL no acaba d'anar bé, entenc que tenen que hi haure
+  més diferències que simplement les dels cicles per sgon. Però no
+  està documentat.
+
+- Ficant cicles a les interrupcions s'ha arreglat el glitch de la
+  primera part de la interrupció i el extrany comportament en la
+  segona pantalla. No obstant en la segona part de la introducció
+  continua apareixent un glitch pero de manera diferent, ara es més
+  fort però pareix que està al límit de fer-ho bé. A més amb la ppu a
+  nivell de línia no va encara bé.
